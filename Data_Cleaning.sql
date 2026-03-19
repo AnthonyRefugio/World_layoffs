@@ -98,8 +98,7 @@ WHERE row_num > 1;
 
 -- 2. Standardizing data
 SELECT*
-FROM layoffs_staging2
-ORDER BY 1;
+FROM layoffs_staging2;
 
 
 SELECT company, TRIM(company)
@@ -122,3 +121,51 @@ FROM layoffs_staging2;
 
 ALTER TABLE layoffs_staging2
 MODIFY COLUMN `date` DATE;
+
+
+
+-- 3. Look at null values 
+SELECT *
+FROM layoffs_staging2
+WHERE industry IS NULL
+OR industry = '';
+
+SELECT *
+FROM layoffs_staging2
+WHERE company Like 'Eyeo%';
+
+
+SELECT *
+FROM layoffs_staging2
+WHERE percentage_laid_off IS NULL
+AND total_laid_off IS NULL;
+
+
+
+-- 4. remove any unnecessary columns and alter columns
+SELECT *
+FROM layoffs_staging2;
+
+
+DELETE 
+FROM layoffs_staging2
+WHERE percentage_laid_off IS NULL
+AND total_laid_off IS NULL;
+
+ALTER TABLE layoffs_staging2
+DROP COLUMN row_num;
+
+
+ALTER TABLE layoffs_staging2
+MODIFY COLUMN company TEXT FIRST,
+MODIFY COLUMN location TEXT AFTER company,
+MODIFY COLUMN industry TEXT AFTER location,
+MODIFY COLUMN total_laid_off INT AFTER industry,
+MODIFY COLUMN percentage_laid_off TEXT AFTER total_laid_off,
+MODIFY COLUMN `date` DATE AFTER percentage_laid_off,
+MODIFY COLUMN stage TEXT AFTER `date`,
+MODIFY COLUMN country TEXT AFTER stage,
+MODIFY COLUMN funds_raised_millions INT AFTER country
+
+SELECT *
+FROM layoffs_staging2;
