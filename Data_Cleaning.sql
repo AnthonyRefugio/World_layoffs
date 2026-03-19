@@ -53,16 +53,6 @@ CREATE TABLE `layoffs_staging2` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-
-INSERT INTO layoffs_staging2
-SELECT 
-        *,
-		ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised_millions) AS row_num
-FROM 
-    layoffs_staging;
-
-
-
 INSERT INTO layoffs_staging2
 SELECT *,
     ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised_millions) AS row_num
@@ -74,7 +64,34 @@ FROM layoffs_staging2
 WHERE row_num > 1;
 
 SELECT *
-FROM layoffs_staging2;
+FROM layoffs_staging2
+WHERE row_num > 1;
+
 
 
 -- 2. Standardizing data
+SELECT*
+FROM layoffs_staging2
+ORDER BY 1;
+
+
+SELECT company, TRIM(company)
+FROM layoffs_staging2;
+
+UPDATE layoffs_staging2
+SET company = TRIM(company);
+
+
+
+SELECT `date`,
+    STR_TO_DATE(`date`, '%m/%d/%Y')
+FROM layoffs_staging2;
+
+UPDATE layoffs_staging2
+SET `date` = STR_TO_DATE(`date`, '%m/%d/%Y');
+
+SELECT `date`
+FROM layoffs_staging2;
+
+ALTER TABLE layoffs_staging2
+MODIFY COLUMN `date` DATE;
