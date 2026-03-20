@@ -30,3 +30,27 @@ ORDER BY total_layoffs DESC;
 
 
 
+-- 2. Which countries had the most layoffs
+
+SELECT 
+    country,
+    SUM(total_laid_off) AS total_layoffs,
+    ROUND(SUM(total_laid_off) * 100 / (SELECT SUM(total_laid_off) FROM layoffs_staging2), 2) AS percentage_of_total
+FROM layoffs_staging2
+WHERE country IS NOT NULL
+GROUP BY country
+ORDER BY total_layoffs DESC;
+
+
+SELECT 
+    CASE WHEN country = 'United States' THEN 'United States' ELSE 'Rest of World' END AS region,
+    SUM(total_laid_off) AS total_layoffs,
+    ROUND(SUM(total_laid_off) * 100 / (SELECT SUM(total_laid_off) FROM layoffs_staging2), 2) AS percentage_of_total
+FROM layoffs_staging2
+WHERE country IS NOT NULL
+GROUP BY region
+ORDER BY total_layoffs DESC;
+
+
+
+-- What years/months saw the most layoffs
