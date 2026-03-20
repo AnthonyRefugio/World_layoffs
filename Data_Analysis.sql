@@ -53,4 +53,28 @@ ORDER BY total_layoffs DESC;
 
 
 
--- What years/months saw the most layoffs
+-- 3. What years/months saw the most layoffs
+
+SELECT
+    DATE_FORMAT(`date`, '%Y-%m') AS month,
+    SUM(total_laid_off) AS total_layoffs
+FROM layoffs_staging2
+WHERE `date` IS NOT NULL
+GROUP BY DATE_FORMAT(`date`, '%Y-%m')
+ORDER BY month ASC;
+
+
+WITH rolling_total AS (
+    SELECT
+        DATE_FORMAT(`date`, '%Y-%m') AS month, 
+        SUM(total_laid_off) AS total_layoffs
+    FROM layoffs_staging2
+    WHERE `date` IS NOT NULL
+    GROUP BY DATE_FORMAT(`date`, '%Y-%m')
+)
+SELECT
+    month,
+    total_layoffs,
+    SUM(total_layoffs) OVER (ORDER BY month ASC) AS rolling_total
+FROM rolling_total
+ORDER BY month ASC;
