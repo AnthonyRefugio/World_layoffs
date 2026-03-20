@@ -25,7 +25,7 @@ WITH duplicate_cte AS
 (
 	SELECT 
         *,
-		ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised_millions) AS row_num
+		ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised) AS row_num
     FROM 
         layoffs_staging
 )
@@ -47,7 +47,7 @@ CREATE TABLE `layoffs_staging2` (
   `percentage_laid_off` text,
   `industry` text,
   `stage` text,
-  `funds_raised_millions` int DEFAULT NULL,
+  `funds_raised` int DEFAULT NULL,
   `country` text,
   `row_num` INT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
@@ -55,7 +55,7 @@ CREATE TABLE `layoffs_staging2` (
 
 INSERT INTO layoffs_staging2
 SELECT *,
-    ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised_millions) AS row_num
+    ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised) AS row_num
 FROM layoffs_staging
 
 
@@ -67,33 +67,6 @@ SELECT *
 FROM layoffs_staging2
 WHERE row_num > 1;
 
--- Was still seeing duplicates so I added this after 
-SELECT company, location, industry, total_laid_off, 
-       percentage_laid_off, `date`, stage, country, 
-       funds_raised_millions, COUNT(*) as count
-FROM layoffs_staging2
-GROUP BY company, location, industry, total_laid_off, 
-         percentage_laid_off, `date`, stage, country, 
-         funds_raised_millions
-HAVING count > 1; 
-
-TRUNCATE TABLE layoffs_staging2;
-
-INSERT INTO layoffs_staging2
-SELECT *,
-ROW_NUMBER() OVER (
-    PARTITION BY company, location, industry, 
-    IFNULL(total_laid_off, 'NULL'), 
-    IFNULL(percentage_laid_off, 'NULL'), 
-    `date`, stage, country, 
-    IFNULL(funds_raised_millions, 'NULL')
-) AS row_num
-FROM layoffs_staging;
-
-
-DELETE 
-FROM layoffs_staging2
-WHERE row_num > 1;
 
 
 -- 2. Standardizing data
@@ -165,7 +138,7 @@ MODIFY COLUMN percentage_laid_off TEXT AFTER total_laid_off,
 MODIFY COLUMN `date` DATE AFTER percentage_laid_off,
 MODIFY COLUMN stage TEXT AFTER `date`,
 MODIFY COLUMN country TEXT AFTER stage,
-MODIFY COLUMN funds_raised_millions INT AFTER country
+MODIFY COLUMN funds_raised INT AFTER country
 
 SELECT *
 FROM layoffs_staging2;
