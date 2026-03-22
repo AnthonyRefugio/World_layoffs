@@ -18,6 +18,9 @@ FROM layoffs_staging2;
 SELECT MIN(`date`), MAX(`date`)
 FROM layoffs_staging2;
 
+SELECT COUNT(company)
+FROM layoffs_staging2;
+
 
 SELECT 
     industry,
@@ -31,6 +34,8 @@ ORDER BY total_layoffs DESC;
 
 
 -- 2. Which countries had the most layoffs
+SELECT COUNT(DISTINCT country)
+FROM layoffs_staging2;
 
 SELECT 
     country,

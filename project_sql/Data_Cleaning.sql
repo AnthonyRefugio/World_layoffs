@@ -21,8 +21,7 @@ SELECT *
 FROM layoffs_staging;
 
 
-WITH duplicate_cte AS 
-(
+WITH duplicate_cte AS(
 	SELECT 
         *,
 		ROW_NUMBER() OVER (PARTITION BY company, location, industry, total_laid_off, percentage_laid_off,`date`, stage, country, funds_raised) AS row_num
